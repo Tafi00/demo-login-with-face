@@ -1,0 +1,6 @@
+flask==3.1.0
+flask-cors==5.0.1
+face_recognition==1.3.0
+numpy
+Pillow
+gunicorn==23.0.0
