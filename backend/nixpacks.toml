@@ -1,12 +1,9 @@
-[phases.setup]
-nixPkgs = ["python311", "python311Packages.pip", "cmake", "gcc"]
-aptPkgs = ["build-essential", "libopenblas-dev", "liblapack-dev", "libx11-dev"]
+# Chỉ thêm system packages cần thiết cho build dlib (face_recognition)
+# Nixpacks tự xử lý Python + pip install -r requirements.txt
 
-[phases.install]
-cmds = [
-    "python -m pip install --break-system-packages --upgrade pip",
-    "python -m pip install --break-system-packages -r requirements.txt"
-]
+[phases.setup]
+nixPkgs = ['...', 'cmake']
+aptPkgs = ['build-essential', 'libopenblas-dev', 'liblapack-dev', 'libx11-dev']
 
 [start]
-cmd = "python -m gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
+cmd = "gunicorn app:app --bind 0.0.0.0:${PORT:-5000} --workers 2 --timeout 120"
