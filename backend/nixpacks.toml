@@ -4,9 +4,9 @@ aptPkgs = ["build-essential", "libopenblas-dev", "liblapack-dev", "libx11-dev"]
 
 [phases.install]
 cmds = [
-    "pip install --break-system-packages --upgrade pip",
-    "pip install --break-system-packages -r requirements.txt"
+    "python -m pip install --break-system-packages --upgrade pip",
+    "python -m pip install --break-system-packages -r requirements.txt"
 ]
 
 [start]
-cmd = "gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
+cmd = "python -m gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
