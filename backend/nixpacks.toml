@@ -1,17 +1,12 @@
 [phases.setup]
-nixPkgs = ["python311", "cmake", "gcc"]
+nixPkgs = ["python311", "python311Packages.pip", "cmake", "gcc"]
 aptPkgs = ["build-essential", "libopenblas-dev", "liblapack-dev", "libx11-dev"]
 
 [phases.install]
 cmds = [
-    "python -m venv --without-pip /opt/venv",
-    "python -m ensurepip --root /opt/venv --upgrade --default-pip",
-    "/opt/venv/bin/python -m pip install --upgrade pip",
-    "/opt/venv/bin/pip install -r requirements.txt"
+    "pip install --break-system-packages --upgrade pip",
+    "pip install --break-system-packages -r requirements.txt"
 ]
 
-[variables]
-NIXPACKS_PATH = "/opt/venv/bin"
-
 [start]
-cmd = "/opt/venv/bin/gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
+cmd = "gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
