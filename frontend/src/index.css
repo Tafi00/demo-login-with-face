@@ -31,7 +31,9 @@
   padding: 0;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
 }
 
@@ -70,6 +72,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -171,8 +174,15 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ==================== Form Elements ==================== */
@@ -246,8 +256,17 @@ body {
 }
 
 @keyframes pulseGuide {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.02); }
+
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
 }
 
 .webcam-placeholder {
@@ -430,7 +449,9 @@ body {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ==================== Scanning Animation ==================== */
@@ -456,8 +477,15 @@ body {
 }
 
 @keyframes scanMove {
-  0%, 100% { top: 20%; }
-  50% { top: 80%; }
+
+  0%,
+  100% {
+    top: 20%;
+  }
+
+  50% {
+    top: 80%;
+  }
 }
 
 .scanning-text {
@@ -466,6 +494,67 @@ body {
   font-weight: 600;
   margin-top: 60px;
   z-index: 2;
+}
+
+/* ==================== Upload Dropzone ==================== */
+.upload-dropzone {
+  width: 100%;
+  aspect-ratio: 4/3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px dashed var(--border);
+  border-radius: 16px;
+}
+
+.upload-dropzone:hover {
+  border-color: var(--accent);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.upload-dropzone.drag-active {
+  border-color: var(--accent-light);
+  background: rgba(99, 102, 241, 0.1);
+  transform: scale(1.01);
+}
+
+.upload-icon {
+  font-size: 48px;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.upload-dropzone:hover .upload-icon,
+.upload-dropzone.drag-active .upload-icon {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+
+.upload-text {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.upload-hint {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* ==================== Auto Scan ==================== */
+.scanning-overlay.auto-scan {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.auto-hint {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 4px;
+  font-style: italic;
 }
 
 /* ==================== Responsive ==================== */

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import Webcam from 'react-webcam'
 import axios from 'axios'
 
@@ -10,38 +10,29 @@ const videoConstraints = {
     facingMode: 'user',
 }
 
+// Auto-scan interval in milliseconds
+const SCAN_INTERVAL = 2000
+
 function LoginTab() {
     const webcamRef = useRef(null)
+    const scanIntervalRef = useRef(null)
     const [cameraActive, setCameraActive] = useState(false)
     const [scanning, setScanning] = useState(false)
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState(null)
     const [loggedInUser, setLoggedInUser] = useState(null)
+    const [statusText, setStatusText] = useState('')
 
-    const startCamera = () => {
-        setCameraActive(true)
-        setMessage(null)
-        setLoggedInUser(null)
-    }
+    const attemptLogin = useCallback(async () => {
+        if (!webcamRef.current || loading) return
 
-    const handleScan = useCallback(async () => {
-        if (!webcamRef.current) return
+        const imageSrc = webcamRef.current.getScreenshot()
+        if (!imageSrc) return
 
         setScanning(true)
         setLoading(true)
+        setStatusText('Đang nhận diện khuôn mặt...')
         setMessage(null)
-
-        // Small delay for scanning animation effect
-        await new Promise((resolve) => setTimeout(resolve, 1500))
-
-        const imageSrc = webcamRef.current.getScreenshot()
-
-        if (!imageSrc) {
-            setMessage({ type: 'error', text: 'Không thể chụp ảnh. Vui lòng thử lại.' })
-            setScanning(false)
-            setLoading(false)
-            return
-        }
 
         try {
             const response = await axios.post(`${API_URL}/login`, {
@@ -49,22 +40,92 @@ function LoginTab() {
             })
 
             if (response.data.success) {
+                // Stop scanning on success
+                if (scanIntervalRef.current) {
+                    clearInterval(scanIntervalRef.current)
+                    scanIntervalRef.current = null
+                }
                 setLoggedInUser(response.data.user)
                 setCameraActive(false)
+                setScanning(false)
+                setLoading(false)
+                setStatusText('')
+                return
             }
         } catch (error) {
-            const msg = error.response?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.'
-            setMessage({ type: 'error', text: msg })
+            const msg = error.response?.data?.message || ''
+            // Show non-intrusive status for common "not found" errors
+            if (error.response?.status === 401) {
+                setStatusText('Chưa nhận diện được, đang thử lại...')
+            } else if (error.response?.status === 400) {
+                setStatusText('Đưa khuôn mặt vào khung hình...')
+            } else {
+                setStatusText(msg || 'Đang thử lại...')
+            }
         } finally {
             setScanning(false)
             setLoading(false)
         }
-    }, [webcamRef])
+    }, [loading])
+
+    // Start auto-scanning when camera becomes active
+    useEffect(() => {
+        if (cameraActive && !loggedInUser) {
+            // Wait 1.5s for camera to warm up, then start scanning
+            const startTimeout = setTimeout(() => {
+                setStatusText('Đang tìm khuôn mặt...')
+                // Run first scan immediately
+                attemptLogin()
+                // Then scan periodically
+                scanIntervalRef.current = setInterval(() => {
+                    attemptLogin()
+                }, SCAN_INTERVAL)
+            }, 1500)
+
+            return () => {
+                clearTimeout(startTimeout)
+                if (scanIntervalRef.current) {
+                    clearInterval(scanIntervalRef.current)
+                    scanIntervalRef.current = null
+                }
+            }
+        }
+    }, [cameraActive, loggedInUser, attemptLogin])
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (scanIntervalRef.current) {
+                clearInterval(scanIntervalRef.current)
+                scanIntervalRef.current = null
+            }
+        }
+    }, [])
+
+    const startCamera = () => {
+        setCameraActive(true)
+        setMessage(null)
+        setLoggedInUser(null)
+        setStatusText('Đang khởi động camera...')
+    }
+
+    const stopCamera = () => {
+        if (scanIntervalRef.current) {
+            clearInterval(scanIntervalRef.current)
+            scanIntervalRef.current = null
+        }
+        setCameraActive(false)
+        setScanning(false)
+        setLoading(false)
+        setStatusText('')
+        setMessage(null)
+    }
 
     const handleLogout = () => {
         setLoggedInUser(null)
         setCameraActive(false)
         setMessage(null)
+        setStatusText('')
     }
 
     // Logged in state
@@ -102,17 +163,17 @@ function LoginTab() {
                         <div className="webcam-overlay">
                             <div className="face-guide" />
                         </div>
-                        {scanning && (
-                            <div className="scanning-overlay">
-                                <div className="scan-line" />
-                                <span className="scanning-text">Đang quét khuôn mặt...</span>
-                            </div>
-                        )}
+                        {/* Always show scanning overlay while camera is active */}
+                        <div className="scanning-overlay auto-scan">
+                            <div className="scan-line" />
+                            <span className="scanning-text">{statusText}</span>
+                        </div>
                     </>
                 ) : (
                     <div className="webcam-placeholder">
                         <span className="icon">🔍</span>
                         <span>Nhấn nút bên dưới để mở camera</span>
+                        <span className="auto-hint">Tự động nhận diện khi phát hiện khuôn mặt</span>
                     </div>
                 )}
             </div>
@@ -122,21 +183,8 @@ function LoginTab() {
                     <span>📷</span> Mở Camera
                 </button>
             ) : (
-                <button
-                    className="btn btn-primary"
-                    onClick={handleScan}
-                    disabled={loading}
-                >
-                    {loading ? (
-                        <>
-                            <div className="spinner" />
-                            Đang xử lý...
-                        </>
-                    ) : (
-                        <>
-                            <span>🔐</span> Quét & Đăng nhập
-                        </>
-                    )}
+                <button className="btn btn-secondary" onClick={stopCamera}>
+                    <span>⏹️</span> Tắt Camera
                 </button>
             )}
 
