@@ -1,9 +1,0 @@
-# Chỉ thêm system packages cần thiết cho build dlib (face_recognition)
-# Nixpacks tự xử lý Python + pip install -r requirements.txt
-
-[phases.setup]
-nixPkgs = ['...', 'cmake']
-aptPkgs = ['build-essential', 'libopenblas-dev', 'liblapack-dev', 'libx11-dev']
-
-[start]
-cmd = ". /opt/venv/bin/activate && gunicorn app:app --bind 0.0.0.0:${PORT:-5000} --workers 2 --timeout 120"
