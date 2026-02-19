@@ -95,7 +95,7 @@ body {
   justify-content: center;
   margin: 0 auto 16px;
   box-shadow: var(--shadow-glow);
-  font-size: 28px;
+  color: white;
 }
 
 .app-title {
@@ -163,8 +163,8 @@ body {
   box-shadow: 0 4px 15px var(--accent-glow);
 }
 
-.tab-btn .icon {
-  font-size: 16px;
+.tab-btn svg {
+  flex-shrink: 0;
 }
 
 /* ==================== Tab Content ==================== */
@@ -281,8 +281,7 @@ body {
   font-size: 14px;
 }
 
-.webcam-placeholder .icon {
-  font-size: 48px;
+.webcam-placeholder .placeholder-icon {
   opacity: 0.3;
 }
 
@@ -386,9 +385,10 @@ body {
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
-.message .icon {
-  font-size: 18px;
+.message .msg-icon {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 /* ==================== Welcome Screen ==================== */
@@ -523,15 +523,16 @@ body {
 }
 
 .upload-icon {
-  font-size: 48px;
   opacity: 0.5;
   transition: all 0.3s ease;
+  color: var(--text-muted);
 }
 
 .upload-dropzone:hover .upload-icon,
 .upload-dropzone.drag-active .upload-icon {
   opacity: 0.8;
   transform: scale(1.1);
+  color: var(--accent-light);
 }
 
 .upload-text {

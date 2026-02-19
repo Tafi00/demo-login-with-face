@@ -3,6 +3,36 @@ import axios from 'axios'
 
 const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api`
 
+// SVG Icons
+const CameraIcon = ({ size = 24 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+        <circle cx="12" cy="13" r="4" />
+    </svg>
+)
+
+const RefreshIcon = ({ size = 18 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="23 4 23 10 17 10" />
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+    </svg>
+)
+
+const CheckIcon = ({ size = 18 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+        <polyline points="22 4 12 14.01 9 11.01" />
+    </svg>
+)
+
+const AlertIcon = ({ size = 18 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="15" y1="9" x2="9" y2="15" />
+        <line x1="9" y1="9" x2="15" y2="15" />
+    </svg>
+)
+
 function RegisterTab() {
     const fileInputRef = useRef(null)
     const [name, setName] = useState('')
@@ -15,25 +45,20 @@ function RegisterTab() {
     const handleFileSelect = (file) => {
         if (!file) return
 
-        // Validate file type
         if (!file.type.startsWith('image/')) {
             setMessage({ type: 'error', text: 'Vui lòng chọn file ảnh (JPEG, PNG, ...)' })
             return
         }
 
-        // Validate file size (max 10MB)
         if (file.size > 10 * 1024 * 1024) {
             setMessage({ type: 'error', text: 'Ảnh quá lớn. Tối đa 10MB.' })
             return
         }
 
         setMessage(null)
-
-        // Create preview URL
         const url = URL.createObjectURL(file)
         setPreviewUrl(url)
 
-        // Convert to base64
         const reader = new FileReader()
         reader.onloadend = () => {
             setSelectedImage(reader.result)
@@ -97,7 +122,6 @@ function RegisterTab() {
             })
 
             setMessage({ type: 'success', text: response.data.message })
-            // Reset form after success
             setTimeout(() => {
                 setName('')
                 setSelectedImage(null)
@@ -131,7 +155,7 @@ function RegisterTab() {
             {/* Image Upload Section */}
             <label className="form-label">Khuôn mặt</label>
 
-            {/* Hidden file input */}
+            {/* Hidden file input — accept camera on mobile too */}
             <input
                 ref={fileInputRef}
                 type="file"
@@ -152,31 +176,27 @@ function RegisterTab() {
                         onDragOver={handleDrag}
                         onDrop={handleDrop}
                     >
-                        <div className="upload-icon">🖼️</div>
+                        <div className="upload-icon">
+                            <CameraIcon size={48} />
+                        </div>
                         <span className="upload-text">Nhấn để chọn ảnh hoặc kéo thả vào đây</span>
                         <span className="upload-hint">Hỗ trợ JPEG, PNG • Tối đa 10MB</span>
                     </div>
                 )}
             </div>
 
-            {/* Action Buttons */}
-            {!previewUrl && (
-                <button className="btn btn-capture" onClick={openFilePicker}>
-                    <span>🖼️</span> Chọn ảnh từ máy
-                </button>
-            )}
-
+            {/* Action Buttons — only show when image is selected */}
             {previewUrl && (
                 <div className="btn-group">
                     <button className="btn btn-secondary" onClick={removeImage}>
-                        <span>🔄</span> Chọn ảnh khác
+                        <RefreshIcon /> Chọn ảnh khác
                     </button>
                     <button
                         className="btn btn-primary"
                         onClick={handleRegister}
                         disabled={loading}
                     >
-                        {loading ? <div className="spinner" /> : <><span>✅</span> Đăng ký</>}
+                        {loading ? <div className="spinner" /> : <><CheckIcon /> Đăng ký</>}
                     </button>
                 </div>
             )}
@@ -184,7 +204,9 @@ function RegisterTab() {
             {/* Message */}
             {message && (
                 <div className={`message ${message.type}`}>
-                    <span className="icon">{message.type === 'success' ? '✅' : '❌'}</span>
+                    <span className="msg-icon">
+                        {message.type === 'success' ? <CheckIcon /> : <AlertIcon />}
+                    </span>
                     {message.text}
                 </div>
             )}
