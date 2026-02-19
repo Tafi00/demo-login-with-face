@@ -6,4 +6,4 @@ nixPkgs = ['...', 'cmake']
 aptPkgs = ['build-essential', 'libopenblas-dev', 'liblapack-dev', 'libx11-dev']
 
 [start]
-cmd = "gunicorn app:app --bind 0.0.0.0:${PORT:-5000} --workers 2 --timeout 120"
+cmd = ". /opt/venv/bin/activate && gunicorn app:app --bind 0.0.0.0:${PORT:-5000} --workers 2 --timeout 120"
