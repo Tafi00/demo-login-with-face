@@ -4,7 +4,7 @@ import base64
 import sqlite3
 import numpy as np
 from io import BytesIO
-from PIL import Image
+from PIL import Image, ImageOps
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import face_recognition
@@ -51,7 +51,19 @@ def decode_base64_image(base64_string):
         base64_string = base64_string.split(",")[1]
 
     image_data = base64.b64decode(base64_string)
-    image = Image.open(BytesIO(image_data)).convert("RGB")
+    image = Image.open(BytesIO(image_data))
+
+    # Fix EXIF orientation (critical for photos from phone galleries)
+    image = ImageOps.exif_transpose(image)
+
+    # Convert to RGB (handles RGBA, palette, etc.)
+    image = image.convert("RGB")
+
+    # Resize if too large — very high-res images can cause face detection to fail
+    max_dimension = 1920
+    if max(image.size) > max_dimension:
+        image.thumbnail((max_dimension, max_dimension), Image.LANCZOS)
+
     return np.array(image)
 
 
