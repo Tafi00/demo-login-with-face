@@ -427,15 +427,66 @@ body {
   margin-bottom: 8px;
 }
 
-.welcome-confidence {
-  color: var(--text-muted);
-  font-size: 13px;
+.welcome-subtitle {
+  color: var(--success);
+  font-size: 14px;
+  font-weight: 500;
   margin-bottom: 24px;
 }
 
-.welcome-confidence span {
-  color: var(--success);
-  font-weight: 600;
+.welcome-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-danger-outline {
+  background: transparent;
+  color: var(--error);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger-outline:hover:not(:disabled) {
+  background: var(--error-bg);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.btn-danger {
+  background: var(--error);
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.btn-sm {
+  padding: 10px 16px;
+  font-size: 13px;
+}
+
+.delete-confirm {
+  background: var(--error-bg);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 14px;
+  padding: 16px;
+  animation: fadeIn 0.3s ease;
+}
+
+.delete-confirm-text {
+  color: var(--error);
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.delete-confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.delete-confirm-actions .btn {
+  flex: 1;
 }
 
 /* ==================== Spinner ==================== */

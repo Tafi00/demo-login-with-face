@@ -1,6 +1,9 @@
-FROM python:3.11-slim
+# syntax=docker/dockerfile:1
+
+FROM python:3.11-slim AS base
 
 # Install system dependencies for dlib/face_recognition
+# This layer is cached unless the apt-get commands change
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
@@ -12,13 +15,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Copy requirements first for Docker layer caching
+# ---------- Stage: dependencies ----------
+# Copy ONLY requirements.txt so this layer is only rebuilt
+# when dependencies actually change
+FROM base AS dependencies
+
 COPY requirements.txt .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Use BuildKit cache mount for pip so downloaded wheels/packages
+# are persisted across builds. This is the KEY optimization:
+# even if this layer re-runs, pip won't re-download everything.
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements.txt
 
-# Copy application code
+# ---------- Stage: final ----------
+FROM dependencies AS final
+
+# Copy application code — only this layer is rebuilt
+# when your source code changes
 COPY . .
 
 # Expose port

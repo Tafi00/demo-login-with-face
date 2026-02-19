@@ -4,6 +4,7 @@ import axios from 'axios'
 
 const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api`
 
+
 const videoConstraints = {
     width: 480,
     height: 360,
@@ -56,6 +57,15 @@ const LogoutIcon = ({ size = 18 }) => (
     </svg>
 )
 
+const TrashIcon = ({ size = 18 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="3 6 5 6 21 6" />
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        <line x1="10" y1="11" x2="10" y2="17" />
+        <line x1="14" y1="11" x2="14" y2="17" />
+    </svg>
+)
+
 const CheckIcon = ({ size = 18 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
@@ -80,6 +90,8 @@ function LoginTab() {
     const [message, setMessage] = useState(null)
     const [loggedInUser, setLoggedInUser] = useState(null)
     const [statusText, setStatusText] = useState('')
+    const [deleting, setDeleting] = useState(false)
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
     const attemptLogin = useCallback(async () => {
         if (!webcamRef.current || loading) return
@@ -177,6 +189,24 @@ function LoginTab() {
         setCameraActive(false)
         setMessage(null)
         setStatusText('')
+        setShowDeleteConfirm(false)
+    }
+
+    const handleDeleteData = async () => {
+        if (!loggedInUser) return
+        setDeleting(true)
+        try {
+            await axios.delete(`${API_URL}/users/${encodeURIComponent(loggedInUser.name)}`)
+            setLoggedInUser(null)
+            setCameraActive(false)
+            setMessage(null)
+            setStatusText('')
+            setShowDeleteConfirm(false)
+        } catch (error) {
+            console.error('Delete failed:', error)
+        } finally {
+            setDeleting(false)
+        }
     }
 
     if (loggedInUser) {
@@ -187,12 +217,30 @@ function LoginTab() {
                 </div>
                 <div className="welcome-title">Xin chào,</div>
                 <div className="welcome-name">{loggedInUser.name}</div>
-                <div className="welcome-confidence">
-                    Độ chính xác: <span>{loggedInUser.confidence}%</span>
+                <div className="welcome-subtitle">Đăng nhập thành công!</div>
+
+                <div className="welcome-actions">
+                    <button className="btn btn-secondary" onClick={handleLogout}>
+                        <LogoutIcon /> Đăng xuất
+                    </button>
+                    {!showDeleteConfirm ? (
+                        <button className="btn btn-danger-outline" onClick={() => setShowDeleteConfirm(true)}>
+                            <TrashIcon /> Xoá dữ liệu
+                        </button>
+                    ) : (
+                        <div className="delete-confirm">
+                            <p className="delete-confirm-text">Bạn có chắc muốn xoá dữ liệu khuôn mặt?</p>
+                            <div className="delete-confirm-actions">
+                                <button className="btn btn-secondary btn-sm" onClick={() => setShowDeleteConfirm(false)}>
+                                    Huỷ
+                                </button>
+                                <button className="btn btn-danger btn-sm" onClick={handleDeleteData} disabled={deleting}>
+                                    {deleting ? <div className="spinner" /> : <>Xác nhận xoá</>}
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
-                <button className="btn btn-secondary" onClick={handleLogout}>
-                    <LogoutIcon /> Đăng xuất
-                </button>
             </div>
         )
     }

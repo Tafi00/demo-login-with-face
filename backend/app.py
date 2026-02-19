@@ -190,6 +190,27 @@ def get_users():
     })
 
 
+@app.route("/api/users/<name>", methods=["DELETE"])
+def delete_user(name):
+    """Delete a user's registered face data by name."""
+    conn = get_db()
+    cursor = conn.execute("DELETE FROM users WHERE name = ?", (name,))
+    conn.commit()
+    deleted = cursor.rowcount
+    conn.close()
+
+    if deleted == 0:
+        return jsonify({
+            "success": False,
+            "message": "Không tìm thấy người dùng."
+        }), 404
+
+    return jsonify({
+        "success": True,
+        "message": f"Đã xoá dữ liệu của {name}."
+    })
+
+
 # Init DB khi module được load (cả gunicorn lẫn dev)
 init_db()
 
